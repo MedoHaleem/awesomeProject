@@ -1,6 +1,7 @@
 package main
 
 import (
+	"awesomeProject/controllers"
 	"awesomeProject/views"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -8,8 +9,9 @@ import (
 )
 
 var (
-	homeView *views.View
+	homeView    *views.View
 	contactView *views.View
+	faqView     *views.View
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +26,7 @@ func contact(w http.ResponseWriter, r *http.Request) {
 
 func faq(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprint(w, "<h1>FAQ</h1><p>List of the most common questions</p>")
+	must(faqView.Render(w, nil))
 }
 
 func notFound(w http.ResponseWriter, r *http.Request) {
@@ -33,15 +35,17 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<h1>Sorry, but we couldn't find the page you were looking for</h1>")
 }
 
-
 func main() {
-	homeView = views.NewView("bootstrap","views/home.gohtml")
-	contactView = views.NewView("bootstrap","views/contact.gohtml")
+	homeView = views.NewView("bootstrap", "views/home.gohtml")
+	contactView = views.NewView("bootstrap", "views/contact.gohtml")
+	faqView = views.NewView("bootstrap", "views/faq.gohtml")
+	usersC := controllers.NewUsers()
 	r := mux.NewRouter()
 	r.NotFoundHandler = http.HandlerFunc(notFound)
 	r.HandleFunc("/", home)
 	r.HandleFunc("/faq", faq)
 	r.HandleFunc("/contact", contact)
+	r.HandleFunc("/signup", usersC.New)
 	http.ListenAndServe(":3000", r)
 }
 
